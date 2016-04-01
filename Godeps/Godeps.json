@@ -1,0 +1,90 @@
+{
+	"ImportPath": "heroku-dataserver",
+	"GoVersion": "go1.6",
+	"Packages": [
+		"./cmd/..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "dataserver/controllers",
+			"Rev": "6c5ed8d3219f4a9bedc031678dbdd3bd6a74de56"
+		},
+		{
+			"ImportPath": "dataserver/handler",
+			"Rev": "6c5ed8d3219f4a9bedc031678dbdd3bd6a74de56"
+		},
+		{
+			"ImportPath": "dataserver/healthcheck",
+			"Rev": "6c5ed8d3219f4a9bedc031678dbdd3bd6a74de56"
+		},
+		{
+			"ImportPath": "dataserver/models",
+			"Rev": "6c5ed8d3219f4a9bedc031678dbdd3bd6a74de56"
+		},
+		{
+			"ImportPath": "dataserver/routers",
+			"Rev": "6c5ed8d3219f4a9bedc031678dbdd3bd6a74de56"
+		},
+		{
+			"ImportPath": "github.com/astaxie/beego",
+			"Comment": "v1.6.0-9-gfbb98fb",
+			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
+		},
+		{
+			"ImportPath": "github.com/astaxie/beego/config",
+			"Comment": "v1.6.0-9-gfbb98fb",
+			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
+		},
+		{
+			"ImportPath": "github.com/astaxie/beego/context",
+			"Comment": "v1.6.0-9-gfbb98fb",
+			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
+		},
+		{
+			"ImportPath": "github.com/astaxie/beego/grace",
+			"Comment": "v1.6.0-9-gfbb98fb",
+			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
+		},
+		{
+			"ImportPath": "github.com/astaxie/beego/logs",
+			"Comment": "v1.6.0-9-gfbb98fb",
+			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
+		},
+		{
+			"ImportPath": "github.com/astaxie/beego/session",
+			"Comment": "v1.6.0-9-gfbb98fb",
+			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
+		},
+		{
+			"ImportPath": "github.com/astaxie/beego/swagger",
+			"Comment": "v1.6.0-9-gfbb98fb",
+			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
+		},
+		{
+			"ImportPath": "github.com/astaxie/beego/toolbox",
+			"Comment": "v1.6.0-9-gfbb98fb",
+			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
+		},
+		{
+			"ImportPath": "github.com/astaxie/beego/utils",
+			"Comment": "v1.6.0-9-gfbb98fb",
+			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2",
+			"Rev": "7b34a2cbaf8236577278a7df39f007fc93a66dcd"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2/bson",
+			"Rev": "7b34a2cbaf8236577278a7df39f007fc93a66dcd"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2/internal/sasl",
+			"Rev": "7b34a2cbaf8236577278a7df39f007fc93a66dcd"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2/internal/scram",
+			"Rev": "7b34a2cbaf8236577278a7df39f007fc93a66dcd"
+		}
+	]
+}
