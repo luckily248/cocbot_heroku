@@ -1,7 +1,7 @@
 package healthcheck
 
 import (
-	"dataserver/models"
+	"heroku-dataserver/cmd/dataserver/models"
 )
 
 type DatabaseCheck struct {

@@ -1,7 +1,7 @@
 package tests
 
 import (
-	. "dataserver/models"
+	. "heroku-dataserver/cmd/dataserver/models"
 	"testing"
 	"time"
 

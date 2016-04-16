@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"bytes"
-	"dataserver/handler"
-	"dataserver/models"
 	"encoding/json"
 	"fmt"
+	"heroku-dataserver/cmd/dataserver/handler"
+	"heroku-dataserver/cmd/dataserver/models"
 	"io/ioutil"
 	"net/http"
 	"strings"

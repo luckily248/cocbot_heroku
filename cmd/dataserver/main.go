@@ -1,9 +1,9 @@
 package main
 
 import (
-	_ "dataserver/routers"
+	_ "heroku-dataserver/cmd/dataserver/routers"
 
-	"dataserver/healthcheck"
+	"heroku-dataserver/cmd/dataserver/healthcheck"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/toolbox"
@@ -15,7 +15,6 @@ func main() {
 		beego.StaticDir["/swagger"] = "swagger"
 	}
 	toolbox.AddHealthCheck("database", &healthcheck.CitycontentCheck{})
-	toolbox.AddHealthCheck("citycontent", &healthcheck.DatabaseCheck{})
 	//collector.Run()
 	beego.Run()
 }
