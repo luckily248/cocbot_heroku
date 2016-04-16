@@ -6,23 +6,23 @@
 	],
 	"Deps": [
 		{
-			"ImportPath": "heroku-dataserver/cmd/dataserver/controllers",
+			"ImportPath": "cocbot_heroku/cmd/bot/controllers",
 			"Rev": "6c5ed8d3219f4a9bedc031678dbdd3bd6a74de56"
 		},
 		{
-			"ImportPath": "heroku-dataserver/cmd/dataserver/handler",
+			"ImportPath": "cocbot_heroku/cmd/bot/handler",
 			"Rev": "6c5ed8d3219f4a9bedc031678dbdd3bd6a74de56"
 		},
 		{
-			"ImportPath": "heroku-dataserver/cmd/dataserver/healthcheck",
+			"ImportPath": "cocbot_heroku/cmd/bot/healthcheck",
 			"Rev": "6c5ed8d3219f4a9bedc031678dbdd3bd6a74de56"
 		},
 		{
-			"ImportPath": "heroku-dataserver/cmd/dataserver/models",
+			"ImportPath": "cocbot_heroku/cmd/bot/models",
 			"Rev": "6c5ed8d3219f4a9bedc031678dbdd3bd6a74de56"
 		},
 		{
-			"ImportPath": "heroku-dataserver/cmd/dataserver/routers",
+			"ImportPath": "cocbot_heroku/cmd/bot/routers",
 			"Rev": "6c5ed8d3219f4a9bedc031678dbdd3bd6a74de56"
 		},
 		{

@@ -1,1 +1,1 @@
-web: cc 
+web: cocbot_heroku
