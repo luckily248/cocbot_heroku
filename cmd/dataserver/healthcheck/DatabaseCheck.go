@@ -1,7 +1,7 @@
 package healthcheck
 
 import (
-	"heroku-dataserver/cmd/dataserver/models"
+	"cocbot_heroku/cmd/dataserver/models"
 )
 
 type DatabaseCheck struct {
