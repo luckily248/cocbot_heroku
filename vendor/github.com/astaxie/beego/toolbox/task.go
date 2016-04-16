@@ -69,7 +69,7 @@ const (
 	starBit = 1 << 63
 )
 
-// Schedule time taks schedule
+// time taks schedule
 type Schedule struct {
 	Second uint64
 	Minute uint64
@@ -79,10 +79,10 @@ type Schedule struct {
 	Week   uint64
 }
 
-// TaskFunc task func type
+// task func type
 type TaskFunc func() error
 
-// Tasker task interface
+// task interface
 type Tasker interface {
 	GetSpec() string
 	GetStatus() string
@@ -99,7 +99,7 @@ type taskerr struct {
 	errinfo string
 }
 
-// Task task struct
+// task struct
 type Task struct {
 	Taskname string
 	Spec     *Schedule
@@ -111,7 +111,7 @@ type Task struct {
 	ErrLimit int        // max length for the errlist, 0 stand for no limit
 }
 
-// NewTask add new task with name, time and func
+// add new task with name, time and func
 func NewTask(tname string, spec string, f TaskFunc) *Task {
 
 	task := &Task{
@@ -124,49 +124,49 @@ func NewTask(tname string, spec string, f TaskFunc) *Task {
 	return task
 }
 
-// GetSpec get spec string
-func (t *Task) GetSpec() string {
-	return t.SpecStr
+//get spec string
+func (s *Task) GetSpec() string {
+	return s.SpecStr
 }
 
-// GetStatus get current task status
-func (t *Task) GetStatus() string {
+// get current task status
+func (tk *Task) GetStatus() string {
 	var str string
-	for _, v := range t.Errlist {
+	for _, v := range tk.Errlist {
 		str += v.t.String() + ":" + v.errinfo + "<br>"
 	}
 	return str
 }
 
-// Run run all tasks
-func (t *Task) Run() error {
-	err := t.DoFunc()
+// run task
+func (tk *Task) Run() error {
+	err := tk.DoFunc()
 	if err != nil {
-		if t.ErrLimit > 0 && t.ErrLimit > len(t.Errlist) {
-			t.Errlist = append(t.Errlist, &taskerr{t: t.Next, errinfo: err.Error()})
+		if tk.ErrLimit > 0 && tk.ErrLimit > len(tk.Errlist) {
+			tk.Errlist = append(tk.Errlist, &taskerr{t: tk.Next, errinfo: err.Error()})
 		}
 	}
 	return err
 }
 
-// SetNext set next time for this task
-func (t *Task) SetNext(now time.Time) {
-	t.Next = t.Spec.Next(now)
+// set next time for this task
+func (tk *Task) SetNext(now time.Time) {
+	tk.Next = tk.Spec.Next(now)
 }
 
-// GetNext get the next call time of this task
-func (t *Task) GetNext() time.Time {
-	return t.Next
+// get the next call time of this task
+func (tk *Task) GetNext() time.Time {
+	return tk.Next
 }
 
-// SetPrev set prev time of this task
-func (t *Task) SetPrev(now time.Time) {
-	t.Prev = now
+// set prev time of this task
+func (tk *Task) SetPrev(now time.Time) {
+	tk.Prev = now
 }
 
-// GetPrev get prev time of this task
-func (t *Task) GetPrev() time.Time {
-	return t.Prev
+// get prev time of this task
+func (tk *Task) GetPrev() time.Time {
+	return tk.Prev
 }
 
 // six columns mean：
@@ -177,7 +177,7 @@ func (t *Task) GetPrev() time.Time {
 //       month：1-12
 //       week：0-6（0 means Sunday）
 
-// SetCron some signals：
+// some signals：
 //       *： any time
 //       ,：　 separate signal
 //　　    －：duration
@@ -289,7 +289,7 @@ func (t *Task) parseSpec(spec string) *Schedule {
 	return nil
 }
 
-// Next set schedule to next time
+// set schedule to next time
 func (s *Schedule) Next(t time.Time) time.Time {
 
 	// Start at the earliest possible time (the upcoming second).
@@ -377,8 +377,8 @@ WRAP:
 
 func dayMatches(s *Schedule, t time.Time) bool {
 	var (
-		domMatch = 1<<uint(t.Day())&s.Day > 0
-		dowMatch = 1<<uint(t.Weekday())&s.Week > 0
+		domMatch bool = 1<<uint(t.Day())&s.Day > 0
+		dowMatch bool = 1<<uint(t.Weekday())&s.Week > 0
 	)
 
 	if s.Day&starBit > 0 || s.Week&starBit > 0 {
@@ -387,7 +387,7 @@ func dayMatches(s *Schedule, t time.Time) bool {
 	return domMatch || dowMatch
 }
 
-// StartTask start all tasks
+// start all tasks
 func StartTask() {
 	isstart = true
 	go run()
@@ -430,13 +430,13 @@ func run() {
 	}
 }
 
-// StopTask stop all tasks
+// start all tasks
 func StopTask() {
 	isstart = false
 	stop <- true
 }
 
-// AddTask add task with name
+// add task with name
 func AddTask(taskname string, t Tasker) {
 	AdminTaskList[taskname] = t
 	if isstart {
@@ -444,7 +444,7 @@ func AddTask(taskname string, t Tasker) {
 	}
 }
 
-// DeleteTask delete task with name
+// add task with name
 func DeleteTask(taskname string) {
 	delete(AdminTaskList, taskname)
 	if isstart {
@@ -452,13 +452,13 @@ func DeleteTask(taskname string) {
 	}
 }
 
-// MapSorter sort map for tasker
+// sort map for tasker
 type MapSorter struct {
 	Keys []string
 	Vals []Tasker
 }
 
-// NewMapSorter create new tasker map
+// create new tasker map
 func NewMapSorter(m map[string]Tasker) *MapSorter {
 	ms := &MapSorter{
 		Keys: make([]string, 0, len(m)),
@@ -471,7 +471,7 @@ func NewMapSorter(m map[string]Tasker) *MapSorter {
 	return ms
 }
 
-// Sort sort tasker map
+// sort tasker map
 func (ms *MapSorter) Sort() {
 	sort.Sort(ms)
 }
@@ -512,11 +512,11 @@ func getRange(expr string, r bounds) uint64 {
 		singleDigit      = len(lowAndHigh) == 1
 	)
 
-	var extrastar uint64
+	var extra_star uint64
 	if lowAndHigh[0] == "*" || lowAndHigh[0] == "?" {
 		start = r.min
 		end = r.max
-		extrastar = starBit
+		extra_star = starBit
 	} else {
 		start = parseIntOrName(lowAndHigh[0], r.names)
 		switch len(lowAndHigh) {
@@ -553,7 +553,7 @@ func getRange(expr string, r bounds) uint64 {
 		log.Panicf("Beginning of range (%d) beyond end of range (%d): %s", start, end, expr)
 	}
 
-	return getBits(start, end, step) | extrastar
+	return getBits(start, end, step) | extra_star
 }
 
 // parseIntOrName returns the (possibly-named) integer contained in expr.

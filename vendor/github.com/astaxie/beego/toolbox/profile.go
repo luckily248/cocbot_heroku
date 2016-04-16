@@ -34,7 +34,7 @@ func init() {
 	pid = os.Getpid()
 }
 
-// ProcessInput parse input command string
+// parse input command string
 func ProcessInput(input string, w io.Writer) {
 	switch input {
 	case "lookup goroutine":
@@ -58,7 +58,7 @@ func ProcessInput(input string, w io.Writer) {
 	}
 }
 
-// MemProf record memory profile in pprof
+// record memory profile in pprof
 func MemProf(w io.Writer) {
 	filename := "mem-" + strconv.Itoa(pid) + ".memprof"
 	if f, err := os.Create(filename); err != nil {
@@ -74,7 +74,7 @@ func MemProf(w io.Writer) {
 	}
 }
 
-// GetCPUProfile start cpu profile monitor
+// start cpu profile monitor
 func GetCPUProfile(w io.Writer) {
 	sec := 30
 	filename := "cpu-" + strconv.Itoa(pid) + ".pprof"
@@ -92,7 +92,7 @@ func GetCPUProfile(w io.Writer) {
 	fmt.Fprintf(w, "Now you can use this to check it: go tool pprof %s %s\n", fl, filename)
 }
 
-// PrintGCSummary print gc information to io.Writer
+// print gc information to io.Writer
 func PrintGCSummary(w io.Writer) {
 	memStats := &runtime.MemStats{}
 	runtime.ReadMemStats(memStats)

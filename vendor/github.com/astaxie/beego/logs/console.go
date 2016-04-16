@@ -21,11 +21,9 @@ import (
 	"runtime"
 )
 
-// brush is a color join function
-type brush func(string) string
+type Brush func(string) string
 
-// newBrush return a fix color Brush
-func newBrush(color string) brush {
+func NewBrush(color string) Brush {
 	pre := "\033["
 	reset := "\033[0m"
 	return func(text string) string {
@@ -33,43 +31,43 @@ func newBrush(color string) brush {
 	}
 }
 
-var colors = []brush{
-	newBrush("1;37"), // Emergency	white
-	newBrush("1;36"), // Alert			cyan
-	newBrush("1;35"), // Critical   magenta
-	newBrush("1;31"), // Error      red
-	newBrush("1;33"), // Warning    yellow
-	newBrush("1;32"), // Notice			green
-	newBrush("1;34"), // Informational	blue
-	newBrush("1;34"), // Debug      blue
+var colors = []Brush{
+	NewBrush("1;37"), // Emergency	white
+	NewBrush("1;36"), // Alert			cyan
+	NewBrush("1;35"), // Critical   magenta
+	NewBrush("1;31"), // Error      red
+	NewBrush("1;33"), // Warning    yellow
+	NewBrush("1;32"), // Notice			green
+	NewBrush("1;34"), // Informational	blue
+	NewBrush("1;34"), // Debug      blue
 }
 
-// consoleWriter implements LoggerInterface and writes messages to terminal.
-type consoleWriter struct {
+// ConsoleWriter implements LoggerInterface and writes messages to terminal.
+type ConsoleWriter struct {
 	lg    *log.Logger
 	Level int `json:"level"`
 }
 
-// NewConsole create ConsoleWriter returning as LoggerInterface.
-func NewConsole() Logger {
-	cw := &consoleWriter{
+// create ConsoleWriter returning as LoggerInterface.
+func NewConsole() LoggerInterface {
+	cw := &ConsoleWriter{
 		lg:    log.New(os.Stdout, "", log.Ldate|log.Ltime),
 		Level: LevelDebug,
 	}
 	return cw
 }
 
-// Init init console logger.
+// init console logger.
 // jsonconfig like '{"level":LevelTrace}'.
-func (c *consoleWriter) Init(jsonconfig string) error {
+func (c *ConsoleWriter) Init(jsonconfig string) error {
 	if len(jsonconfig) == 0 {
 		return nil
 	}
 	return json.Unmarshal([]byte(jsonconfig), c)
 }
 
-// WriteMsg write message in console.
-func (c *consoleWriter) WriteMsg(msg string, level int) error {
+// write message in console.
+func (c *ConsoleWriter) WriteMsg(msg string, level int) error {
 	if level > c.Level {
 		return nil
 	}
@@ -82,13 +80,13 @@ func (c *consoleWriter) WriteMsg(msg string, level int) error {
 	return nil
 }
 
-// Destroy implementing method. empty.
-func (c *consoleWriter) Destroy() {
+// implementing method. empty.
+func (c *ConsoleWriter) Destroy() {
 
 }
 
-// Flush implementing method. empty.
-func (c *consoleWriter) Flush() {
+// implementing method. empty.
+func (c *ConsoleWriter) Flush() {
 
 }
 

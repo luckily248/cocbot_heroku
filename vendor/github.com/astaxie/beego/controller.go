@@ -19,6 +19,7 @@ import (
 	"errors"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -33,19 +34,18 @@ import (
 
 //commonly used mime-types
 const (
-	applicationJSON = "application/json"
-	applicationXML  = "application/xml"
-	textXML         = "text/xml"
+	applicationJson = "application/json"
+	applicationXml  = "application/xml"
+	textXml         = "text/xml"
 )
 
 var (
-	// ErrAbort custom error when user stop request handler manually.
-	ErrAbort = errors.New("User stop run")
-	// GlobalControllerRouter store comments with controller. pkgpath+controller:comments
-	GlobalControllerRouter = make(map[string][]ControllerComments)
+	// custom error when user stop request handler manually.
+	USERSTOPRUN                                            = errors.New("User stop run")
+	GlobalControllerRouter map[string][]ControllerComments = make(map[string][]ControllerComments) //pkgpath+controller:comments
 )
 
-// ControllerComments store the comment for the controller method
+// store the comment for the controller method
 type ControllerComments struct {
 	Method           string
 	Router           string
@@ -56,31 +56,22 @@ type ControllerComments struct {
 // Controller defines some basic http request handler operations, such as
 // http context, template and view, session and xsrf.
 type Controller struct {
-	// context data
-	Ctx  *context.Context
-	Data map[interface{}]interface{}
-
-	// route controller info
+	Ctx            *context.Context
+	Data           map[interface{}]interface{}
 	controllerName string
 	actionName     string
-	methodMapping  map[string]func() //method:routertree
-	gotofunc       string
-	AppController  interface{}
-
-	// template data
-	TplName        string
+	TplNames       string
 	Layout         string
 	LayoutSections map[string]string // the key is the section name and the value is the template name
 	TplExt         string
+	_xsrf_token    string
+	gotofunc       string
+	CruSession     session.SessionStore
+	XSRFExpire     int
+	AppController  interface{}
 	EnableRender   bool
-
-	// xsrf data
-	_xsrfToken string
-	XSRFExpire int
-	EnableXSRF bool
-
-	// session
-	CruSession session.Store
+	EnableXSRF     bool
+	methodMapping  map[string]func() //method:routertree
 }
 
 // ControllerInterface is an interface to uniform all controller handler.
@@ -96,8 +87,8 @@ type ControllerInterface interface {
 	Options()
 	Finish()
 	Render() error
-	XSRFToken() string
-	CheckXSRFCookie() bool
+	XsrfToken() string
+	CheckXsrfCookie() bool
 	HandlerFunc(fn string) bool
 	URLMapping()
 }
@@ -105,7 +96,7 @@ type ControllerInterface interface {
 // Init generates default values of controller operations.
 func (c *Controller) Init(ctx *context.Context, controllerName, actionName string, app interface{}) {
 	c.Layout = ""
-	c.TplName = ""
+	c.TplNames = ""
 	c.controllerName = controllerName
 	c.actionName = actionName
 	c.Ctx = ctx
@@ -113,15 +104,19 @@ func (c *Controller) Init(ctx *context.Context, controllerName, actionName strin
 	c.AppController = app
 	c.EnableRender = true
 	c.EnableXSRF = true
-	c.Data = ctx.Input.Data()
+	c.Data = ctx.Input.Data
 	c.methodMapping = make(map[string]func())
 }
 
 // Prepare runs after Init before request function execution.
-func (c *Controller) Prepare() {}
+func (c *Controller) Prepare() {
+
+}
 
 // Finish runs after request function execution.
-func (c *Controller) Finish() {}
+func (c *Controller) Finish() {
+
+}
 
 // Get adds a request function to handle GET request.
 func (c *Controller) Get() {
@@ -158,19 +153,20 @@ func (c *Controller) Options() {
 	http.Error(c.Ctx.ResponseWriter, "Method Not Allowed", 405)
 }
 
-// HandlerFunc call function with the name
+// call function fn
 func (c *Controller) HandlerFunc(fnname string) bool {
 	if v, ok := c.methodMapping[fnname]; ok {
 		v()
 		return true
+	} else {
+		return false
 	}
-	return false
 }
 
 // URLMapping register the internal Controller router.
-func (c *Controller) URLMapping() {}
+func (c *Controller) URLMapping() {
+}
 
-// Mapping the method to function
 func (c *Controller) Mapping(method string, fn func()) {
 	c.methodMapping[method] = fn
 }
@@ -181,11 +177,13 @@ func (c *Controller) Render() error {
 		return nil
 	}
 	rb, err := c.RenderBytes()
+
 	if err != nil {
 		return err
+	} else {
+		c.Ctx.Output.Header("Content-Type", "text/html; charset=utf-8")
+		c.Ctx.Output.Body(rb)
 	}
-	c.Ctx.Output.Header("Content-Type", "text/html; charset=utf-8")
-	c.Ctx.Output.Body(rb)
 	return nil
 }
 
@@ -198,33 +196,24 @@ func (c *Controller) RenderString() (string, error) {
 // RenderBytes returns the bytes of rendered template string. Do not send out response.
 func (c *Controller) RenderBytes() ([]byte, error) {
 	//if the controller has set layout, then first get the tplname's content set the content to the layout
-	var buf bytes.Buffer
 	if c.Layout != "" {
-		if c.TplName == "" {
-			c.TplName = strings.ToLower(c.controllerName) + "/" + strings.ToLower(c.actionName) + "." + c.TplExt
+		if c.TplNames == "" {
+			c.TplNames = strings.ToLower(c.controllerName) + "/" + strings.ToLower(c.actionName) + "." + c.TplExt
 		}
-
-		if BConfig.RunMode == DEV {
-			buildFiles := []string{c.TplName}
-			if c.LayoutSections != nil {
-				for _, sectionTpl := range c.LayoutSections {
-					if sectionTpl == "" {
-						continue
-					}
-					buildFiles = append(buildFiles, sectionTpl)
-				}
-			}
-			BuildTemplate(BConfig.WebConfig.ViewsPath, buildFiles...)
+		if RunMode == "dev" {
+			BuildTemplate(ViewsPath)
 		}
-		if _, ok := BeeTemplates[c.TplName]; !ok {
-			panic("can't find templatefile in the path:" + c.TplName)
+		newbytes := bytes.NewBufferString("")
+		if _, ok := BeeTemplates[c.TplNames]; !ok {
+			panic("can't find templatefile in the path:" + c.TplNames)
 		}
-		err := BeeTemplates[c.TplName].ExecuteTemplate(&buf, c.TplName, c.Data)
+		err := BeeTemplates[c.TplNames].ExecuteTemplate(newbytes, c.TplNames, c.Data)
 		if err != nil {
 			Trace("template Execute err:", err)
 			return nil, err
 		}
-		c.Data["LayoutContent"] = template.HTML(buf.String())
+		tplcontent, _ := ioutil.ReadAll(newbytes)
+		c.Data["LayoutContent"] = template.HTML(string(tplcontent))
 
 		if c.LayoutSections != nil {
 			for sectionName, sectionTpl := range c.LayoutSections {
@@ -233,41 +222,44 @@ func (c *Controller) RenderBytes() ([]byte, error) {
 					continue
 				}
 
-				buf.Reset()
-				err = BeeTemplates[sectionTpl].ExecuteTemplate(&buf, sectionTpl, c.Data)
+				sectionBytes := bytes.NewBufferString("")
+				err = BeeTemplates[sectionTpl].ExecuteTemplate(sectionBytes, sectionTpl, c.Data)
 				if err != nil {
 					Trace("template Execute err:", err)
 					return nil, err
 				}
-				c.Data[sectionName] = template.HTML(buf.String())
+				sectionContent, _ := ioutil.ReadAll(sectionBytes)
+				c.Data[sectionName] = template.HTML(string(sectionContent))
 			}
 		}
 
-		buf.Reset()
-		err = BeeTemplates[c.Layout].ExecuteTemplate(&buf, c.Layout, c.Data)
+		ibytes := bytes.NewBufferString("")
+		err = BeeTemplates[c.Layout].ExecuteTemplate(ibytes, c.Layout, c.Data)
 		if err != nil {
 			Trace("template Execute err:", err)
 			return nil, err
 		}
-		return buf.Bytes(), nil
+		icontent, _ := ioutil.ReadAll(ibytes)
+		return icontent, nil
+	} else {
+		if c.TplNames == "" {
+			c.TplNames = strings.ToLower(c.controllerName) + "/" + strings.ToLower(c.actionName) + "." + c.TplExt
+		}
+		if RunMode == "dev" {
+			BuildTemplate(ViewsPath)
+		}
+		ibytes := bytes.NewBufferString("")
+		if _, ok := BeeTemplates[c.TplNames]; !ok {
+			panic("can't find templatefile in the path:" + c.TplNames)
+		}
+		err := BeeTemplates[c.TplNames].ExecuteTemplate(ibytes, c.TplNames, c.Data)
+		if err != nil {
+			Trace("template Execute err:", err)
+			return nil, err
+		}
+		icontent, _ := ioutil.ReadAll(ibytes)
+		return icontent, nil
 	}
-
-	if c.TplName == "" {
-		c.TplName = strings.ToLower(c.controllerName) + "/" + strings.ToLower(c.actionName) + "." + c.TplExt
-	}
-	if BConfig.RunMode == DEV {
-		BuildTemplate(BConfig.WebConfig.ViewsPath, c.TplName)
-	}
-	if _, ok := BeeTemplates[c.TplName]; !ok {
-		panic("can't find templatefile in the path:" + c.TplName)
-	}
-	buf.Reset()
-	err := BeeTemplates[c.TplName].ExecuteTemplate(&buf, c.TplName, c.Data)
-	if err != nil {
-		Trace("template Execute err:", err)
-		return nil, err
-	}
-	return buf.Bytes(), nil
 }
 
 // Redirect sends the redirection response to url with status code.
@@ -275,7 +267,7 @@ func (c *Controller) Redirect(url string, code int) {
 	c.Ctx.Redirect(code, url)
 }
 
-// Abort stops controller handler and show the error data if code is defined in ErrorMap or code string.
+// Aborts stops controller handler and show the error data if code is defined in ErrorMap or code string.
 func (c *Controller) Abort(code string) {
 	status, err := strconv.Atoi(code)
 	if err != nil {
@@ -293,69 +285,74 @@ func (c *Controller) CustomAbort(status int, body string) {
 	}
 	// last panic user string
 	c.Ctx.ResponseWriter.Write([]byte(body))
-	panic(ErrAbort)
+	panic(USERSTOPRUN)
 }
 
 // StopRun makes panic of USERSTOPRUN error and go to recover function if defined.
 func (c *Controller) StopRun() {
-	panic(ErrAbort)
+	panic(USERSTOPRUN)
 }
 
-// URLFor does another controller handler in this request function.
+// UrlFor does another controller handler in this request function.
 // it goes to this controller method if endpoint is not clear.
-func (c *Controller) URLFor(endpoint string, values ...interface{}) string {
-	if len(endpoint) == 0 {
+func (c *Controller) UrlFor(endpoint string, values ...interface{}) string {
+	if len(endpoint) <= 0 {
 		return ""
 	}
 	if endpoint[0] == '.' {
-		return URLFor(reflect.Indirect(reflect.ValueOf(c.AppController)).Type().Name()+endpoint, values...)
+		return UrlFor(reflect.Indirect(reflect.ValueOf(c.AppController)).Type().Name()+endpoint, values...)
+	} else {
+		return UrlFor(endpoint, values...)
 	}
-	return URLFor(endpoint, values...)
 }
 
-// ServeJSON sends a json response with encoding charset.
-func (c *Controller) ServeJSON(encoding ...bool) {
-	var (
-		hasIndent   = true
-		hasEncoding = false
-	)
-	if BConfig.RunMode == PROD {
+// ServeJson sends a json response with encoding charset.
+func (c *Controller) ServeJson(encoding ...bool) {
+	var hasIndent bool
+	var hasencoding bool
+	if RunMode == "prod" {
 		hasIndent = false
+	} else {
+		hasIndent = true
 	}
 	if len(encoding) > 0 && encoding[0] == true {
-		hasEncoding = true
+		hasencoding = true
 	}
-	c.Ctx.Output.JSON(c.Data["json"], hasIndent, hasEncoding)
+	c.Ctx.Output.Json(c.Data["json"], hasIndent, hasencoding)
 }
 
-// ServeJSONP sends a jsonp response.
-func (c *Controller) ServeJSONP() {
-	hasIndent := true
-	if BConfig.RunMode == PROD {
+// ServeJsonp sends a jsonp response.
+func (c *Controller) ServeJsonp() {
+	var hasIndent bool
+	if RunMode == "prod" {
 		hasIndent = false
+	} else {
+		hasIndent = true
 	}
-	c.Ctx.Output.JSONP(c.Data["jsonp"], hasIndent)
+	c.Ctx.Output.Jsonp(c.Data["jsonp"], hasIndent)
 }
 
-// ServeXML sends xml response.
-func (c *Controller) ServeXML() {
-	hasIndent := true
-	if BConfig.RunMode == PROD {
+// ServeXml sends xml response.
+func (c *Controller) ServeXml() {
+	var hasIndent bool
+	if RunMode == "prod" {
 		hasIndent = false
+	} else {
+		hasIndent = true
 	}
-	c.Ctx.Output.XML(c.Data["xml"], hasIndent)
+	c.Ctx.Output.Xml(c.Data["xml"], hasIndent)
 }
 
 // ServeFormatted serve Xml OR Json, depending on the value of the Accept header
 func (c *Controller) ServeFormatted() {
 	accept := c.Ctx.Input.Header("Accept")
 	switch accept {
-	case applicationJSON:
-		c.ServeJSON()
-	case applicationXML, textXML:
-		c.ServeXML()
+	case applicationJson:
+		c.ServeJson()
+	case applicationXml, textXml:
+		c.ServeXml()
 	default:
-		c.ServeJSON()
+		c.ServeJson()
 	}
 }
 
@@ -374,13 +371,16 @@ func (c *Controller) ParseForm(obj interface{}) error {
 
 // GetString returns the input value by key string or the default value while it's present and input is blank
 func (c *Controller) GetString(key string, def ...string) string {
+	var defv string
+	if len(def) > 0 {
+		defv = def[0]
+	}
+
 	if v := c.Ctx.Input.Query(key); v != "" {
 		return v
+	} else {
+		return defv
 	}
-	if len(def) > 0 {
-		return def[0]
-	}
-	return ""
 }
 
 // GetStrings returns the input string slice by key string or the default value while it's present and input is blank
@@ -391,79 +391,106 @@ func (c *Controller) GetStrings(key string, def ...[]string) []string {
 		defv = def[0]
 	}
 
-	if f := c.Input(); f == nil {
+	f := c.Input()
+	if f == nil {
 		return defv
-	} else if vs := f[key]; len(vs) > 0 {
-		return vs
 	}
 
-	return defv
+	vs := f[key]
+	if len(vs) > 0 {
+		return vs
+	} else {
+		return defv
+	}
 }
 
 // GetInt returns input as an int or the default value while it's present and input is blank
 func (c *Controller) GetInt(key string, def ...int) (int, error) {
-	strv := c.Ctx.Input.Query(key)
-	if len(strv) == 0 && len(def) > 0 {
+	if strv := c.Ctx.Input.Query(key); strv != "" {
+		return strconv.Atoi(strv)
+	} else if len(def) > 0 {
 		return def[0], nil
+	} else {
+		return strconv.Atoi(strv)
 	}
-	return strconv.Atoi(strv)
 }
 
 // GetInt8 return input as an int8 or the default value while it's present and input is blank
 func (c *Controller) GetInt8(key string, def ...int8) (int8, error) {
-	strv := c.Ctx.Input.Query(key)
-	if len(strv) == 0 && len(def) > 0 {
+	if strv := c.Ctx.Input.Query(key); strv != "" {
+		i64, err := strconv.ParseInt(strv, 10, 8)
+		i8 := int8(i64)
+		return i8, err
+	} else if len(def) > 0 {
 		return def[0], nil
+	} else {
+		i64, err := strconv.ParseInt(strv, 10, 8)
+		i8 := int8(i64)
+		return i8, err
 	}
-	i64, err := strconv.ParseInt(strv, 10, 8)
-	return int8(i64), err
 }
 
 // GetInt16 returns input as an int16 or the default value while it's present and input is blank
 func (c *Controller) GetInt16(key string, def ...int16) (int16, error) {
-	strv := c.Ctx.Input.Query(key)
-	if len(strv) == 0 && len(def) > 0 {
+	if strv := c.Ctx.Input.Query(key); strv != "" {
+		i64, err := strconv.ParseInt(strv, 10, 16)
+		i16 := int16(i64)
+		return i16, err
+	} else if len(def) > 0 {
 		return def[0], nil
+	} else {
+		i64, err := strconv.ParseInt(strv, 10, 16)
+		i16 := int16(i64)
+		return i16, err
 	}
-	i64, err := strconv.ParseInt(strv, 10, 16)
-	return int16(i64), err
 }
 
 // GetInt32 returns input as an int32 or the default value while it's present and input is blank
 func (c *Controller) GetInt32(key string, def ...int32) (int32, error) {
-	strv := c.Ctx.Input.Query(key)
-	if len(strv) == 0 && len(def) > 0 {
+	if strv := c.Ctx.Input.Query(key); strv != "" {
+		i64, err := strconv.ParseInt(c.Ctx.Input.Query(key), 10, 32)
+		i32 := int32(i64)
+		return i32, err
+	} else if len(def) > 0 {
 		return def[0], nil
+	} else {
+		i64, err := strconv.ParseInt(c.Ctx.Input.Query(key), 10, 32)
+		i32 := int32(i64)
+		return i32, err
 	}
-	i64, err := strconv.ParseInt(strv, 10, 32)
-	return int32(i64), err
 }
 
 // GetInt64 returns input value as int64 or the default value while it's present and input is blank.
 func (c *Controller) GetInt64(key string, def ...int64) (int64, error) {
-	strv := c.Ctx.Input.Query(key)
-	if len(strv) == 0 && len(def) > 0 {
+	if strv := c.Ctx.Input.Query(key); strv != "" {
+		return strconv.ParseInt(strv, 10, 64)
+	} else if len(def) > 0 {
 		return def[0], nil
+	} else {
+		return strconv.ParseInt(strv, 10, 64)
 	}
-	return strconv.ParseInt(strv, 10, 64)
 }
 
 // GetBool returns input value as bool or the default value while it's present and input is blank.
 func (c *Controller) GetBool(key string, def ...bool) (bool, error) {
-	strv := c.Ctx.Input.Query(key)
-	if len(strv) == 0 && len(def) > 0 {
+	if strv := c.Ctx.Input.Query(key); strv != "" {
+		return strconv.ParseBool(strv)
+	} else if len(def) > 0 {
 		return def[0], nil
+	} else {
+		return strconv.ParseBool(strv)
 	}
-	return strconv.ParseBool(strv)
 }
 
 // GetFloat returns input value as float64 or the default value while it's present and input is blank.
 func (c *Controller) GetFloat(key string, def ...float64) (float64, error) {
-	strv := c.Ctx.Input.Query(key)
-	if len(strv) == 0 && len(def) > 0 {
+	if strv := c.Ctx.Input.Query(key); strv != "" {
+		return strconv.ParseFloat(strv, 64)
+	} else if len(def) > 0 {
 		return def[0], nil
+	} else {
+		return strconv.ParseFloat(strv, 64)
 	}
-	return strconv.ParseFloat(strv, 64)
 }
 
 // GetFile returns the file data in file upload field named as key.
@@ -500,7 +527,8 @@ func (c *Controller) GetFile(key string) (multipart.File, *multipart.FileHeader,
 //	}
 // }
 func (c *Controller) GetFiles(key string) ([]*multipart.FileHeader, error) {
-	if files, ok := c.Ctx.Request.MultipartForm.File[key]; ok {
+	files, ok := c.Ctx.Request.MultipartForm.File[key]
+	if ok {
 		return files, nil
 	}
 	return nil, http.ErrMissingFile
@@ -524,7 +552,7 @@ func (c *Controller) SaveToFile(fromfile, tofile string) error {
 }
 
 // StartSession starts session and load old session data info this controller.
-func (c *Controller) StartSession() session.Store {
+func (c *Controller) StartSession() session.SessionStore {
 	if c.CruSession == nil {
 		c.CruSession = c.Ctx.Input.CruSession
 	}
@@ -547,7 +575,7 @@ func (c *Controller) GetSession(name interface{}) interface{} {
 	return c.CruSession.Get(name)
 }
 
-// DelSession removes value from session.
+// SetSession removes value from session.
 func (c *Controller) DelSession(name interface{}) {
 	if c.CruSession == nil {
 		c.StartSession()
@@ -561,14 +589,13 @@ func (c *Controller) SessionRegenerateID() {
 	if c.CruSession != nil {
 		c.CruSession.SessionRelease(c.Ctx.ResponseWriter)
 	}
-	c.CruSession = GlobalSessions.SessionRegenerateID(c.Ctx.ResponseWriter, c.Ctx.Request)
+	c.CruSession = GlobalSessions.SessionRegenerateId(c.Ctx.ResponseWriter, c.Ctx.Request)
 	c.Ctx.Input.CruSession = c.CruSession
 }
 
 // DestroySession cleans session data and session cookie.
 func (c *Controller) DestroySession() {
 	c.Ctx.Input.CruSession.Flush()
-	c.Ctx.Input.CruSession = nil
 	GlobalSessions.SessionDestroy(c.Ctx.ResponseWriter, c.Ctx.Request)
 }
 
@@ -587,35 +614,37 @@ func (c *Controller) SetSecureCookie(Secret, name, value string, others ...inter
 	c.Ctx.SetSecureCookie(Secret, name, value, others...)
 }
 
-// XSRFToken creates a CSRF token string and returns.
-func (c *Controller) XSRFToken() string {
-	if c._xsrfToken == "" {
-		expire := int64(BConfig.WebConfig.XSRFExpire)
+// XsrfToken creates a xsrf token string and returns.
+func (c *Controller) XsrfToken() string {
+	if c._xsrf_token == "" {
+		var expire int64
 		if c.XSRFExpire > 0 {
 			expire = int64(c.XSRFExpire)
+		} else {
+			expire = int64(XSRFExpire)
 		}
-		c._xsrfToken = c.Ctx.XSRFToken(BConfig.WebConfig.XSRFKey, expire)
+		c._xsrf_token = c.Ctx.XsrfToken(XSRFKEY, expire)
 	}
-	return c._xsrfToken
+	return c._xsrf_token
 }
 
-// CheckXSRFCookie checks xsrf token in this request is valid or not.
+// CheckXsrfCookie checks xsrf token in this request is valid or not.
 // the token can provided in request header "X-Xsrftoken" and "X-CsrfToken"
 // or in form field value named as "_xsrf".
-func (c *Controller) CheckXSRFCookie() bool {
+func (c *Controller) CheckXsrfCookie() bool {
 	if !c.EnableXSRF {
 		return true
 	}
-	return c.Ctx.CheckXSRFCookie()
+	return c.Ctx.CheckXsrfCookie()
 }
 
-// XSRFFormHTML writes an input field contains xsrf token value.
-func (c *Controller) XSRFFormHTML() string {
-	return `<input type="hidden" name="_xsrf" value="` +
-		c.XSRFToken() + `" />`
+// XsrfFormHtml writes an input field contains xsrf token value.
+func (c *Controller) XsrfFormHtml() string {
+	return "<input type=\"hidden\" name=\"_xsrf\" value=\"" +
+		c._xsrf_token + "\"/>"
 }
 
 // GetControllerAndAction gets the executing controller name and action name.
-func (c *Controller) GetControllerAndAction() (string, string) {
+func (c *Controller) GetControllerAndAction() (controllerName, actionName string) {
 	return c.controllerName, c.actionName
 }

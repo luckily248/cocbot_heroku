@@ -1,28 +1,13 @@
 package grace
 
-import (
-	"errors"
-	"net"
-)
+import "net"
 
 type graceConn struct {
 	net.Conn
-	server *Server
+	server *graceServer
 }
 
-func (c graceConn) Close() (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			switch x := r.(type) {
-			case string:
-				err = errors.New(x)
-			case error:
-				err = x
-			default:
-				err = errors.New("Unknown panic")
-			}
-		}
-	}()
+func (c graceConn) Close() error {
 	c.server.wg.Done()
 	return c.Conn.Close()
 }

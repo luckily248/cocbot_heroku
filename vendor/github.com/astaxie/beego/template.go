@@ -28,14 +28,17 @@ import (
 )
 
 var (
-	beegoTplFuncMap = make(template.FuncMap)
-	// BeeTemplates caching map and supported template file extensions.
-	BeeTemplates = make(map[string]*template.Template)
-	// BeeTemplateExt stores the template extension which will build
-	BeeTemplateExt = []string{"tpl", "html"}
+	beegoTplFuncMap template.FuncMap
+	// beego template caching map and supported template file extensions.
+	BeeTemplates   map[string]*template.Template
+	BeeTemplateExt []string
 )
 
 func init() {
+	BeeTemplates = make(map[string]*template.Template)
+	beegoTplFuncMap = make(template.FuncMap)
+	BeeTemplateExt = make([]string, 0)
+	BeeTemplateExt = append(BeeTemplateExt, "tpl", "html")
 	beegoTplFuncMap["dateformat"] = DateFormat
 	beegoTplFuncMap["date"] = Date
 	beegoTplFuncMap["compare"] = Compare
@@ -43,15 +46,14 @@ func init() {
 	beegoTplFuncMap["not_nil"] = NotNil
 	beegoTplFuncMap["not_null"] = NotNil
 	beegoTplFuncMap["substr"] = Substr
-	beegoTplFuncMap["html2str"] = HTML2str
+	beegoTplFuncMap["html2str"] = Html2str
 	beegoTplFuncMap["str2html"] = Str2html
 	beegoTplFuncMap["htmlquote"] = Htmlquote
 	beegoTplFuncMap["htmlunquote"] = Htmlunquote
 	beegoTplFuncMap["renderform"] = RenderForm
 	beegoTplFuncMap["assets_js"] = AssetsJs
-	beegoTplFuncMap["assets_css"] = AssetsCSS
-	beegoTplFuncMap["config"] = GetConfig
-	beegoTplFuncMap["map_get"] = MapGet
+	beegoTplFuncMap["assets_css"] = AssetsCss
+	beegoTplFuncMap["config"] = Config
 
 	// go1.2 added template funcs
 	// Comparisons
@@ -62,7 +64,7 @@ func init() {
 	beegoTplFuncMap["lt"] = lt // <
 	beegoTplFuncMap["ne"] = ne // !=
 
-	beegoTplFuncMap["urlfor"] = URLFor // !=
+	beegoTplFuncMap["urlfor"] = UrlFor // !=
 }
 
 // AddFuncMap let user to register a func in the template.
@@ -76,7 +78,7 @@ type templatefile struct {
 	files map[string][]string
 }
 
-func (tf *templatefile) visit(paths string, f os.FileInfo, err error) error {
+func (self *templatefile) visit(paths string, f os.FileInfo, err error) error {
 	if f == nil {
 		return err
 	}
@@ -89,21 +91,21 @@ func (tf *templatefile) visit(paths string, f os.FileInfo, err error) error {
 
 	replace := strings.NewReplacer("\\", "/")
 	a := []byte(paths)
-	a = a[len([]byte(tf.root)):]
+	a = a[len([]byte(self.root)):]
 	file := strings.TrimLeft(replace.Replace(string(a)), "/")
 	subdir := filepath.Dir(file)
-	if _, ok := tf.files[subdir]; ok {
-		tf.files[subdir] = append(tf.files[subdir], file)
+	if _, ok := self.files[subdir]; ok {
+		self.files[subdir] = append(self.files[subdir], file)
 	} else {
 		m := make([]string, 1)
 		m[0] = file
-		tf.files[subdir] = m
+		self.files[subdir] = m
 	}
 
 	return nil
 }
 
-// HasTemplateExt return this path contains supported template extension of beego or not.
+// return this path contains supported template extension of beego or not.
 func HasTemplateExt(paths string) bool {
 	for _, v := range BeeTemplateExt {
 		if strings.HasSuffix(paths, "."+v) {
@@ -113,7 +115,7 @@ func HasTemplateExt(paths string) bool {
 	return false
 }
 
-// AddTemplateExt add new extension for template.
+// add new extension for template.
 func AddTemplateExt(ext string) {
 	for _, v := range BeeTemplateExt {
 		if v == ext {
@@ -123,14 +125,15 @@ func AddTemplateExt(ext string) {
 	BeeTemplateExt = append(BeeTemplateExt, ext)
 }
 
-// BuildTemplate will build all template files in a directory.
+// build all template files in a directory.
 // it makes beego can render any template file in view directory.
-func BuildTemplate(dir string, files ...string) error {
+func BuildTemplate(dir string) error {
 	if _, err := os.Stat(dir); err != nil {
 		if os.IsNotExist(err) {
 			return nil
+		} else {
+			return errors.New("dir open err")
 		}
-		return errors.New("dir open err")
 	}
 	self := &templatefile{
 		root:  dir,
@@ -145,13 +148,11 @@ func BuildTemplate(dir string, files ...string) error {
 	}
 	for _, v := range self.files {
 		for _, file := range v {
-			if len(files) == 0 || utils.InSlice(file, files) {
-				t, err := getTemplate(self.root, file, v...)
-				if err != nil {
-					Trace("parse template err:", file, err)
-				} else {
-					BeeTemplates[file] = t
-				}
+			t, err := getTemplate(self.root, file, v...)
+			if err != nil {
+				Trace("parse template err:", file, err)
+			} else {
+				BeeTemplates[file] = t
 			}
 		}
 	}
@@ -176,7 +177,7 @@ func getTplDeep(root, file, parent string, t *template.Template) (*template.Temp
 	if err != nil {
 		return nil, [][]string{}, err
 	}
-	reg := regexp.MustCompile(BConfig.WebConfig.TemplateLeft + "[ ]*template[ ]+\"([^\"]+)\"")
+	reg := regexp.MustCompile(TemplateLeft + "[ ]*template[ ]+\"([^\"]+)\"")
 	allsub := reg.FindAllStringSubmatch(string(data), -1)
 	for _, m := range allsub {
 		if len(m) == 2 {
@@ -197,7 +198,7 @@ func getTplDeep(root, file, parent string, t *template.Template) (*template.Temp
 }
 
 func getTemplate(root, file string, others ...string) (t *template.Template, err error) {
-	t = template.New(file).Delims(BConfig.WebConfig.TemplateLeft, BConfig.WebConfig.TemplateRight).Funcs(beegoTplFuncMap)
+	t = template.New(file).Delims(TemplateLeft, TemplateRight).Funcs(beegoTplFuncMap)
 	var submods [][]string
 	t, submods, err = getTplDeep(root, file, "", t)
 	if err != nil {
@@ -239,7 +240,7 @@ func _getTemplate(t0 *template.Template, root string, submods [][]string, others
 				if err != nil {
 					continue
 				}
-				reg := regexp.MustCompile(BConfig.WebConfig.TemplateLeft + "[ ]*define[ ]+\"([^\"]+)\"")
+				reg := regexp.MustCompile(TemplateLeft + "[ ]*define[ ]+\"([^\"]+)\"")
 				allsub := reg.FindAllStringSubmatch(string(data), -1)
 				for _, sub := range allsub {
 					if len(sub) == 2 && sub[1] == m[1] {
@@ -258,31 +259,4 @@ func _getTemplate(t0 *template.Template, root string, submods [][]string, others
 
 	}
 	return
-}
-
-// SetViewsPath sets view directory path in beego application.
-func SetViewsPath(path string) *App {
-	BConfig.WebConfig.ViewsPath = path
-	return BeeApp
-}
-
-// SetStaticPath sets static directory path and proper url pattern in beego application.
-// if beego.SetStaticPath("static","public"), visit /static/* to load static file in folder "public".
-func SetStaticPath(url string, path string) *App {
-	if !strings.HasPrefix(url, "/") {
-		url = "/" + url
-	}
-	url = strings.TrimRight(url, "/")
-	BConfig.WebConfig.StaticDir[url] = path
-	return BeeApp
-}
-
-// DelStaticPath removes the static folder setting in this url pattern in beego application.
-func DelStaticPath(url string) *App {
-	if !strings.HasPrefix(url, "/") {
-		url = "/" + url
-	}
-	url = strings.TrimRight(url, "/")
-	delete(BConfig.WebConfig.StaticDir, url)
-	return BeeApp
 }

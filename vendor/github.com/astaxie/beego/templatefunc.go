@@ -44,8 +44,8 @@ func Substr(s string, start, length int) string {
 	return string(bt[start:end])
 }
 
-// HTML2str returns escaping text convert from html.
-func HTML2str(html string) string {
+// Html2str returns escaping text convert from html.
+func Html2str(html string) string {
 	src := string(html)
 
 	re, _ := regexp.Compile("\\<[\\S\\s]+?\\>")
@@ -115,7 +115,7 @@ var datePatterns = []string{
 	"r", time.RFC1123Z,
 }
 
-// DateParse Parse Date use PHP time format.
+// Parse Date use PHP time format.
 func DateParse(dateString, format string) (time.Time, error) {
 	replacer := strings.NewReplacer(datePatterns...)
 	format = replacer.Replace(format)
@@ -139,18 +139,15 @@ func Compare(a, b interface{}) (equal bool) {
 	return
 }
 
-// CompareNot !Compare
 func CompareNot(a, b interface{}) (equal bool) {
-	return !Compare(a, b)
+    return ! Compare(a, b)
 }
 
-// NotNil the same as CompareNot
-func NotNil(a interface{}) (isNil bool) {
-	return CompareNot(a, nil)
+func NotNil(a interface{}) (is_nil bool) {
+    return CompareNot(a, nil)
 }
 
-// GetConfig get the Appconfig
-func GetConfig(returnType, key string, defaultVal interface{}) (value interface{}, err error) {
+func Config(returnType, key string, defaultVal interface{}) (value interface{}, err error) {
 	switch returnType {
 	case "String":
 		value = AppConfig.String(key)
@@ -165,12 +162,12 @@ func GetConfig(returnType, key string, defaultVal interface{}) (value interface{
 	case "DIY":
 		value, err = AppConfig.DIY(key)
 	default:
-		err = errors.New("Config keys must be of type String, Bool, Int, Int64, Float, or DIY")
+		err = errors.New("Config keys must be of type String, Bool, Int, Int64, Float, or DIY!")
 	}
 
 	if err != nil {
 		if reflect.TypeOf(returnType) != reflect.TypeOf(defaultVal) {
-			err = errors.New("defaultVal type does not match returnType")
+			err = errors.New("defaultVal type does not match returnType!")
 		} else {
 			value, err = defaultVal, nil
 		}
@@ -187,7 +184,7 @@ func GetConfig(returnType, key string, defaultVal interface{}) (value interface{
 	return
 }
 
-// Str2html Convert string to template.HTML type.
+// Convert string to template.HTML type.
 func Str2html(raw string) template.HTML {
 	return template.HTML(raw)
 }
@@ -240,14 +237,14 @@ func Htmlunquote(src string) string {
 	return strings.TrimSpace(text)
 }
 
-// URLFor returns url string with another registered controller handler with params.
+// UrlFor returns url string with another registered controller handler with params.
 //	usage:
 //
-//	URLFor(".index")
-//	print URLFor("index")
+//	UrlFor(".index")
+//	print UrlFor("index")
 //  router /login
-//	print URLFor("login")
-//	print URLFor("login", "next","/"")
+//	print UrlFor("login")
+//	print UrlFor("login", "next","/"")
 //  router /profile/:username
 //	print UrlFor("profile", ":username","John Doe")
 //	result:
@@ -257,11 +254,11 @@ func Htmlunquote(src string) string {
 //	/user/John%20Doe
 //
 //  more detail http://beego.me/docs/mvc/controller/urlbuilding.md
-func URLFor(endpoint string, values ...interface{}) string {
-	return BeeApp.Handlers.URLFor(endpoint, values...)
+func UrlFor(endpoint string, values ...interface{}) string {
+	return BeeApp.Handlers.UrlFor(endpoint, values...)
 }
 
-// AssetsJs returns script tag with src string.
+// returns script tag with src string.
 func AssetsJs(src string) template.HTML {
 	text := string(src)
 
@@ -270,8 +267,8 @@ func AssetsJs(src string) template.HTML {
 	return template.HTML(text)
 }
 
-// AssetsCSS returns stylesheet link tag with src string.
-func AssetsCSS(src string) template.HTML {
+// returns stylesheet link tag with src string.
+func AssetsCss(src string) template.HTML {
 	text := string(src)
 
 	text = "<link href=\"" + src + "\" rel=\"stylesheet\" />"
@@ -279,7 +276,7 @@ func AssetsCSS(src string) template.HTML {
 	return template.HTML(text)
 }
 
-// ParseForm will parse form values to struct via tag.
+// parse form values to struct via tag.
 func ParseForm(form url.Values, obj interface{}) error {
 	objT := reflect.TypeOf(obj)
 	objV := reflect.ValueOf(obj)
@@ -355,7 +352,7 @@ func ParseForm(form url.Values, obj interface{}) error {
 				if len(tags) > 1 {
 					format = tags[1]
 				}
-				t, err := time.ParseInLocation(format, value, time.Local)
+				t, err := time.Parse(format, value)
 				if err != nil {
 					return err
 				}
@@ -401,7 +398,7 @@ var unKind = map[reflect.Kind]bool{
 	reflect.UnsafePointer: true,
 }
 
-// RenderForm will render object to form html.
+// render object to form html.
 // obj must be a struct pointer.
 func RenderForm(obj interface{}) template.HTML {
 	objT := reflect.TypeOf(obj)
@@ -518,6 +515,7 @@ const (
 	complexKind
 	intKind
 	floatKind
+	integerKind
 	stringKind
 	uintKind
 )
@@ -653,77 +651,4 @@ func ge(arg1, arg2 interface{}) (bool, error) {
 	return !lessThan, nil
 }
 
-// MapGet getting value from map by keys
-// usage:
-// Data["m"] = map[string]interface{} {
-//     "a": 1,
-//     "1": map[string]float64{
-//         "c": 4,
-//     },
-// }
-//
-// {{ map_get m "a" }} // return 1
-// {{ map_get m 1 "c" }} // return 4
-func MapGet(arg1 interface{}, arg2 ...interface{}) (interface{}, error) {
-	arg1Type := reflect.TypeOf(arg1)
-	arg1Val := reflect.ValueOf(arg1)
-
-	if arg1Type.Kind() == reflect.Map && len(arg2) > 0 {
-		// check whether arg2[0] type equals to arg1 key type
-		// if they are different, make conversion
-		arg2Val := reflect.ValueOf(arg2[0])
-		arg2Type := reflect.TypeOf(arg2[0])
-		if arg2Type.Kind() != arg1Type.Key().Kind() {
-			// convert arg2Value to string
-			var arg2ConvertedVal interface{}
-			arg2String := fmt.Sprintf("%v", arg2[0])
-
-			// convert string representation to any other type
-			switch arg1Type.Key().Kind() {
-			case reflect.Bool:
-				arg2ConvertedVal, _ = strconv.ParseBool(arg2String)
-			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-				arg2ConvertedVal, _ = strconv.ParseInt(arg2String, 0, 64)
-			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-				arg2ConvertedVal, _ = strconv.ParseUint(arg2String, 0, 64)
-			case reflect.Float32, reflect.Float64:
-				arg2ConvertedVal, _ = strconv.ParseFloat(arg2String, 64)
-			case reflect.String:
-				arg2ConvertedVal = arg2String
-			default:
-				arg2ConvertedVal = arg2Val.Interface()
-			}
-			arg2Val = reflect.ValueOf(arg2ConvertedVal)
-		}
-
-		storedVal := arg1Val.MapIndex(arg2Val)
-
-		if storedVal.IsValid() {
-			var result interface{}
-
-			switch arg1Type.Elem().Kind() {
-			case reflect.Bool:
-				result = storedVal.Bool()
-			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-				result = storedVal.Int()
-			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-				result = storedVal.Uint()
-			case reflect.Float32, reflect.Float64:
-				result = storedVal.Float()
-			case reflect.String:
-				result = storedVal.String()
-			default:
-				result = storedVal.Interface()
-			}
-
-			// if there is more keys, handle this recursively
-			if len(arg2) > 1 {
-				return MapGet(result, arg2[1:]...)
-			}
-			return result, nil
-		}
-		return nil, nil
-
-	}
-	return nil, nil
-}
+// go1.2 added template funcs. end

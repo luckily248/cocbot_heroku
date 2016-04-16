@@ -11,10 +11,10 @@ type graceListener struct {
 	net.Listener
 	stop    chan error
 	stopped bool
-	server  *Server
+	server  *graceServer
 }
 
-func newGraceListener(l net.Listener, srv *Server) (el *graceListener) {
+func newGraceListener(l net.Listener, srv *graceServer) (el *graceListener) {
 	el = &graceListener{
 		Listener: l,
 		stop:     make(chan error),
@@ -46,17 +46,17 @@ func (gl *graceListener) Accept() (c net.Conn, err error) {
 	return
 }
 
-func (gl *graceListener) Close() error {
-	if gl.stopped {
+func (el *graceListener) Close() error {
+	if el.stopped {
 		return syscall.EINVAL
 	}
-	gl.stop <- nil
-	return <-gl.stop
+	el.stop <- nil
+	return <-el.stop
 }
 
-func (gl *graceListener) File() *os.File {
+func (el *graceListener) File() *os.File {
 	// returns a dup(2) - FD_CLOEXEC flag *not* set
-	tl := gl.Listener.(*net.TCPListener)
+	tl := el.Listener.(*net.TCPListener)
 	fl, _ := tl.File()
 	return fl
 }

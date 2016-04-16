@@ -2,4 +2,7 @@
 .DS_Store
 *.swp
 *.swo
-beego.iml
+
+admin.go
+
+toolbox/healthcheck.go

@@ -14,7 +14,11 @@
 
 package beego
 
-var mimemaps = map[string]string{
+import (
+	"mime"
+)
+
+var mimemaps map[string]string = map[string]string{
 	".3dm":         "x-world/x-3dmf",
 	".3dmf":        "x-world/x-3dmf",
 	".7z":          "application/x-7z-compressed",
@@ -553,4 +557,11 @@ var mimemaps = map[string]string{
 	".xpi":         "application/x-xpinstall",
 	".oex":         "application/x-opera-extension",
 	".mustache":    "text/html",
+}
+
+func initMime() error {
+	for k, v := range mimemaps {
+		mime.AddExtensionType(k, v)
+	}
+	return nil
 }

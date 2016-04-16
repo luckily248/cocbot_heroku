@@ -26,6 +26,12 @@ var (
 	dunno     = []byte("???")
 	centerDot = []byte("·")
 	dot       = []byte(".")
+	lbr       = []byte("{")
+	lbrn      = []byte("{\n")
+	com       = []byte(",")
+	comn      = []byte(",\n")
+	rbr       = []byte("}")
+	comnrbr   = []byte(",\n}")
 )
 
 type pointerInfo struct {
@@ -36,12 +42,12 @@ type pointerInfo struct {
 	used []int
 }
 
-// Display print the data in console
+// print the data in console
 func Display(data ...interface{}) {
 	display(true, data...)
 }
 
-// GetDisplayString return data print string
+// return data print string
 func GetDisplayString(data ...interface{}) string {
 	return display(false, data...)
 }
@@ -85,7 +91,7 @@ func fomateinfo(headlen int, data ...interface{}) []byte {
 	for k, v := range data {
 		var buf2 = new(bytes.Buffer)
 		var pointers *pointerInfo
-		var interfaces = make([]reflect.Value, 0, 10)
+		var interfaces []reflect.Value = make([]reflect.Value, 0, 10)
 
 		printKeyValue(buf2, reflect.ValueOf(v), &pointers, &interfaces, nil, true, "    ", 1)
 
@@ -370,8 +376,8 @@ func printKeyValue(buf *bytes.Buffer, val reflect.Value, pointers **pointerInfo,
 	}
 }
 
-// PrintPointerInfo dump pointer value
-func PrintPointerInfo(buf *bytes.Buffer, headlen int, pointers *pointerInfo) {
+// dump pointer value
+func printPointerInfo(buf *bytes.Buffer, headlen int, pointers *pointerInfo) {
 	var anyused = false
 	var pointerNum = 0
 
@@ -379,7 +385,7 @@ func PrintPointerInfo(buf *bytes.Buffer, headlen int, pointers *pointerInfo) {
 		if len(p.used) > 0 {
 			anyused = true
 		}
-		pointerNum++
+		pointerNum += 1
 		p.n = pointerNum
 	}
 
@@ -438,8 +444,8 @@ func PrintPointerInfo(buf *bytes.Buffer, headlen int, pointers *pointerInfo) {
 	}
 }
 
-// Stack get stack bytes
-func Stack(skip int, indent string) []byte {
+// get stack bytes
+func stack(skip int, indent string) []byte {
 	var buf = new(bytes.Buffer)
 
 	for i := skip; ; i++ {

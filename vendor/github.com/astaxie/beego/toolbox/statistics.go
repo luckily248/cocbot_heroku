@@ -22,7 +22,7 @@ import (
 
 // Statistics struct
 type Statistics struct {
-	RequestURL        string
+	RequestUrl        string
 	RequestController string
 	RequestNum        int64
 	MinTime           time.Duration
@@ -30,21 +30,21 @@ type Statistics struct {
 	TotalTime         time.Duration
 }
 
-// URLMap contains several statistics struct to log different data
-type URLMap struct {
+// UrlMap contains several statistics struct to log different data
+type UrlMap struct {
 	lock        sync.RWMutex
 	LengthLimit int //limit the urlmap's length if it's equal to 0 there's no limit
 	urlmap      map[string]map[string]*Statistics
 }
 
-// AddStatistics add statistics task.
+// add statistics task.
 // it needs request method, request url, request controller and statistics time duration
-func (m *URLMap) AddStatistics(requestMethod, requestURL, requestController string, requesttime time.Duration) {
+func (m *UrlMap) AddStatistics(requestMethod, requestUrl, requestController string, requesttime time.Duration) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	if method, ok := m.urlmap[requestURL]; ok {
+	if method, ok := m.urlmap[requestUrl]; ok {
 		if s, ok := method[requestMethod]; ok {
-			s.RequestNum++
+			s.RequestNum += 1
 			if s.MaxTime < requesttime {
 				s.MaxTime = requesttime
 			}
@@ -54,14 +54,14 @@ func (m *URLMap) AddStatistics(requestMethod, requestURL, requestController stri
 			s.TotalTime += requesttime
 		} else {
 			nb := &Statistics{
-				RequestURL:        requestURL,
+				RequestUrl:        requestUrl,
 				RequestController: requestController,
 				RequestNum:        1,
 				MinTime:           requesttime,
 				MaxTime:           requesttime,
 				TotalTime:         requesttime,
 			}
-			m.urlmap[requestURL][requestMethod] = nb
+			m.urlmap[requestUrl][requestMethod] = nb
 		}
 
 	} else {
@@ -70,7 +70,7 @@ func (m *URLMap) AddStatistics(requestMethod, requestURL, requestController stri
 		}
 		methodmap := make(map[string]*Statistics)
 		nb := &Statistics{
-			RequestURL:        requestURL,
+			RequestUrl:        requestUrl,
 			RequestController: requestController,
 			RequestNum:        1,
 			MinTime:           requesttime,
@@ -78,18 +78,18 @@ func (m *URLMap) AddStatistics(requestMethod, requestURL, requestController stri
 			TotalTime:         requesttime,
 		}
 		methodmap[requestMethod] = nb
-		m.urlmap[requestURL] = methodmap
+		m.urlmap[requestUrl] = methodmap
 	}
 }
 
-// GetMap put url statistics result in io.Writer
-func (m *URLMap) GetMap() map[string]interface{} {
+// put url statistics result in io.Writer
+func (m *UrlMap) GetMap() map[string]interface{} {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 
 	var fields = []string{"requestUrl", "method", "times", "used", "max used", "min used", "avg used"}
 
-	var resultLists [][]string
+	resultLists := make([][]string, 0)
 	content := make(map[string]interface{})
 	content["Fields"] = fields
 
@@ -111,10 +111,9 @@ func (m *URLMap) GetMap() map[string]interface{} {
 	return content
 }
 
-// GetMapData return all mapdata
-func (m *URLMap) GetMapData() []map[string]interface{} {
+func (m *UrlMap) GetMapData() []map[string]interface{} {
 
-	var resultLists []map[string]interface{}
+	resultLists := make([]map[string]interface{}, 0)
 
 	for k, v := range m.urlmap {
 		for kk, vv := range v {
@@ -133,11 +132,11 @@ func (m *URLMap) GetMapData() []map[string]interface{} {
 	return resultLists
 }
 
-// StatisticsMap hosld global statistics data map
-var StatisticsMap *URLMap
+// global statistics data map
+var StatisticsMap *UrlMap
 
 func init() {
-	StatisticsMap = &URLMap{
+	StatisticsMap = &UrlMap{
 		urlmap: make(map[string]map[string]*Statistics),
 	}
 }

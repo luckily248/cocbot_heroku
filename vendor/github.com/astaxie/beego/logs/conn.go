@@ -21,9 +21,9 @@ import (
 	"net"
 )
 
-// connWriter implements LoggerInterface.
+// ConnWriter implements LoggerInterface.
 // it writes messages in keep-live tcp connection.
-type connWriter struct {
+type ConnWriter struct {
 	lg             *log.Logger
 	innerWriter    io.WriteCloser
 	ReconnectOnMsg bool   `json:"reconnectOnMsg"`
@@ -33,22 +33,22 @@ type connWriter struct {
 	Level          int    `json:"level"`
 }
 
-// NewConn create new ConnWrite returning as LoggerInterface.
-func NewConn() Logger {
-	conn := new(connWriter)
+// create new ConnWrite returning as LoggerInterface.
+func NewConn() LoggerInterface {
+	conn := new(ConnWriter)
 	conn.Level = LevelTrace
 	return conn
 }
 
-// Init init connection writer with json config.
+// init connection writer with json config.
 // json config only need key "level".
-func (c *connWriter) Init(jsonconfig string) error {
+func (c *ConnWriter) Init(jsonconfig string) error {
 	return json.Unmarshal([]byte(jsonconfig), c)
 }
 
-// WriteMsg write message in connection.
+// write message in connection.
 // if connection is down, try to re-connect.
-func (c *connWriter) WriteMsg(msg string, level int) error {
+func (c *ConnWriter) WriteMsg(msg string, level int) error {
 	if level > c.Level {
 		return nil
 	}
@@ -66,19 +66,19 @@ func (c *connWriter) WriteMsg(msg string, level int) error {
 	return nil
 }
 
-// Flush implementing method. empty.
-func (c *connWriter) Flush() {
+// implementing method. empty.
+func (c *ConnWriter) Flush() {
 
 }
 
-// Destroy destroy connection writer and close tcp listener.
-func (c *connWriter) Destroy() {
+// destroy connection writer and close tcp listener.
+func (c *ConnWriter) Destroy() {
 	if c.innerWriter != nil {
 		c.innerWriter.Close()
 	}
 }
 
-func (c *connWriter) connect() error {
+func (c *ConnWriter) connect() error {
 	if c.innerWriter != nil {
 		c.innerWriter.Close()
 		c.innerWriter = nil
@@ -98,7 +98,7 @@ func (c *connWriter) connect() error {
 	return nil
 }
 
-func (c *connWriter) neddedConnectOnMsg() bool {
+func (c *ConnWriter) neddedConnectOnMsg() bool {
 	if c.Reconnect {
 		c.Reconnect = false
 		return true
