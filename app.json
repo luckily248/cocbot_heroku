@@ -8,7 +8,7 @@
     "example"
   ],
   "image": "heroku/go:1.6",
-  "mount_dir": "src/github.com/heroku/go-getting-started",
-  "website": "http://github.com/heroku/go-getting-started",
-  "repository": "http://github.com/heroku/go-getting-started"
+  "mount_dir": "src/github.com/luckily248/cocbot_heroku",
+  "website": "http://github.com/luckily248/cocbot_heroku",
+  "repository": "http://github.com/luckily248/cocbot_heroku"
 }

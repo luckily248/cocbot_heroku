@@ -11,7 +11,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/astaxie/beego"
+	_ "github.com/astaxie/beego"
 )
 
 // get wardata
