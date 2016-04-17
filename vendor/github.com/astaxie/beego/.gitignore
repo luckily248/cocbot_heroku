@@ -1,8 +1,0 @@
-.idea
-.DS_Store
-*.swp
-*.swo
-
-admin.go
-
-toolbox/healthcheck.go

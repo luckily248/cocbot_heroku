@@ -142,3 +142,12 @@ func httpPost(rep []byte) {
 	}
 	fmt.Println(string(body))
 }
+
+// @Title Get
+// @router / [Get]
+func (c *WarDataController) Home() {
+	data1 := &WarDataModel{*new(BaseDBmodel), "1", "teama", "teamb", "", "", "", ""}
+	datas := map[string]*WarDataModel{"1": data1}
+	c.Data["datas"] = datas
+	c.TplNames = "index.tpl"
+}

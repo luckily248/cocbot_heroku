@@ -1,1 +1,1 @@
-web: cocbot_heroku
+web: bot
