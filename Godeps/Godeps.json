@@ -1,9 +1,75 @@
 {
-	"ImportPath": "cocbot_heroku",
+	"ImportPath": "cocbot_heroku/cmd/bot",
 	"GoVersion": "go1.6",
 	"GodepVersion": "v62",
-	"Packages": [
-		"./.."
-	],
-	"Deps": []
+	"Deps": [
+		{
+			"ImportPath": "bot/healthcheck",
+			"Rev": "77f6a70ae8925fc761f9d4b9b47f19a30a7946d4"
+		},
+		{
+			"ImportPath": "bot/models",
+			"Rev": "77f6a70ae8925fc761f9d4b9b47f19a30a7946d4"
+		},
+		{
+			"ImportPath": "github.com/astaxie/beego",
+			"Comment": "v1.6.0-9-gfbb98fb",
+			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
+		},
+		{
+			"ImportPath": "github.com/astaxie/beego/config",
+			"Comment": "v1.6.0-9-gfbb98fb",
+			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
+		},
+		{
+			"ImportPath": "github.com/astaxie/beego/context",
+			"Comment": "v1.6.0-9-gfbb98fb",
+			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
+		},
+		{
+			"ImportPath": "github.com/astaxie/beego/grace",
+			"Comment": "v1.6.0-9-gfbb98fb",
+			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
+		},
+		{
+			"ImportPath": "github.com/astaxie/beego/logs",
+			"Comment": "v1.6.0-9-gfbb98fb",
+			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
+		},
+		{
+			"ImportPath": "github.com/astaxie/beego/session",
+			"Comment": "v1.6.0-9-gfbb98fb",
+			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
+		},
+		{
+			"ImportPath": "github.com/astaxie/beego/toolbox",
+			"Comment": "v1.6.0-9-gfbb98fb",
+			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
+		},
+		{
+			"ImportPath": "github.com/astaxie/beego/utils",
+			"Comment": "v1.6.0-9-gfbb98fb",
+			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2",
+			"Comment": "r2016.02.04-1-gb6e2fa3",
+			"Rev": "b6e2fa371e64216a45e61072a96d4e3859f169da"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2/bson",
+			"Comment": "r2016.02.04-1-gb6e2fa3",
+			"Rev": "b6e2fa371e64216a45e61072a96d4e3859f169da"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2/internal/sasl",
+			"Comment": "r2016.02.04-1-gb6e2fa3",
+			"Rev": "b6e2fa371e64216a45e61072a96d4e3859f169da"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2/internal/scram",
+			"Comment": "r2016.02.04-1-gb6e2fa3",
+			"Rev": "b6e2fa371e64216a45e61072a96d4e3859f169da"
+		}
+	]
 }
