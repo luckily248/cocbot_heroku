@@ -7,10 +7,6 @@
 	],
 	"Deps": [
 		{
-			"ImportPath": "bot/controllers",
-			"Rev": "77f6a70ae8925fc761f9d4b9b47f19a30a7946d4"
-		},
-		{
 			"ImportPath": "bot/handler",
 			"Rev": "77f6a70ae8925fc761f9d4b9b47f19a30a7946d4"
 		},
