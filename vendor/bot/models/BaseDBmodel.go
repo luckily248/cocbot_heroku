@@ -17,8 +17,7 @@ func (this *BaseDBmodel) DBname() string {
 
 //成功初始化后必须调用  defer this.session.Close()
 func (this *BaseDBmodel) init() (err error) {
-	mgourl := beego.AppConfig.String("mgourl")
-	newsession, err := mgo.Dial(mgourl)
+	newsession, err := mgo.Dial("127.0.0.1:27017")
 	if err != nil {
 		return
 	}
