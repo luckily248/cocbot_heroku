@@ -9,6 +9,7 @@ import (
 	"html"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"unicode/utf8"
 )
@@ -18,7 +19,7 @@ func main() {
 		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 	})
 	http.HandleFunc("/bot", WarDataController)
-	http.ListenAndServe(":8888", nil)
+	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 }
 func WarDataController(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
