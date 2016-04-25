@@ -8,9 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"strings"
-	"time"
 	"unicode/utf8"
 )
 
