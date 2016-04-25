@@ -479,6 +479,10 @@ func (this *EditwarHandler) handle(text []string) (result string, err error) {
 		err = errors.New("group not found groupid:" + mainhandler.rec.Group_id)
 		return
 	}
+	content, err := models.GetWarDatabyclanname(groupname)
+	if err != nil {
+		return
+	}
 	if len(text) < 3 {
 		err = errors.New("i need more info\n" + this.getHelp())
 		return
@@ -488,14 +492,14 @@ func (this *EditwarHandler) handle(text []string) (result string, err error) {
 		err = errors.New("arg2 must be number\n" + this.getHelp())
 		return
 	}
+	nylocation, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		return
+	}
 	num2, err := strconv.Atoi(text[2])
 	isTime := strings.HasSuffix(text[2], "am") || strings.HasSuffix(text[2], "pm")
 	if (err != nil || num2 < 0) && !isTime {
 		err = errors.New("arg3 must be number or time(endwith am/pm)\n" + this.getHelp())
-		return
-	}
-	content, err := models.GetWarDatabyclanname(groupname)
-	if err != nil {
 		return
 	}
 
@@ -535,7 +539,7 @@ func (this *EditwarHandler) handle(text []string) (result string, err error) {
 				if now.Hour()*60+now.Minute() > h*60+mi { //if befor now so will be tmw
 					d++
 				}
-				newtime := time.Date(y, m, d, h, mi, 0, 0, time.Local)
+				newtime := time.Date(y, m, d, h, mi, 0, 0, nylocation)
 				content.Begintime = newtime
 				err := models.UpdateWarData(content)
 				if err == nil {
@@ -568,7 +572,7 @@ func (this *EditwarHandler) handle(text []string) (result string, err error) {
 					d++
 				}
 				fmt.Printf("trim time mi:%d\n", mi)
-				newtime := time.Date(y, m, d, h, mi, 0, 0, time.Local)
+				newtime := time.Date(y, m, d, h, mi, 0, 0, nylocation)
 				content.Begintime = newtime
 				err := models.UpdateWarData(content)
 				if err == nil {
