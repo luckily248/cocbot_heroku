@@ -271,7 +271,10 @@ func UpdateBattleCountbyId(warid int, cout int) (err error) {
 	battle := &Battle{}
 	battle.Init()
 	for i := 1; i < cout+1; i++ {
-		_, err = wardata.DB.Query("INSERT INTO Battle(WarId,BattleNo,Scoutstate) VALUES($1,$2,$3)", warid, i, battle.Scoutstate)
+		if err != nil {
+			break
+		}
+		err = r.Close()
 		if err != nil {
 			break
 		}
