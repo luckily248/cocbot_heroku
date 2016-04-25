@@ -92,12 +92,13 @@ func AddWarData(teama string, teamb string, cout int) (id int, err error) {
 	battle := &Battle{}
 	battle.Init()
 	for i := 1; i < cout+1; i++ {
-		_, err = wardata.DB.Query("INSERT INTO Battle(WarId,BattleNo,Scoutstate) VALUES($1,$2,$3)", id, i, battle.Scoutstate)
+		r, err := wardata.DB.Query("INSERT INTO Battle(WarId,BattleNo,Scoutstate) VALUES($1,$2,$3)", id, i, battle.Scoutstate)
 		if err != nil {
 			break
 		}
-		if i >= 10 {
-			time.Sleep(time.Second * 2)
+		err = r.Close()
+		if err != nil {
+			break
 		}
 	}
 	return

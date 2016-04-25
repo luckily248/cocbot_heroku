@@ -202,7 +202,7 @@ func (this *ShowwarHandler) handle(text []string) (result string, err error) {
 			hightstar := -1
 			hightstars := "ZZZ"
 			lineresult := fmt.Sprintf("||%d.%s ", num+1, battle.Scoutstate)
-			for _, caller := range acallers[num] {
+			for _, caller := range acallers[num+1] {
 				if caller.Starstate > -1 && caller.Starstate < 4 {
 					if caller.Starstate > hightstar {
 						hightstar = caller.Starstate
@@ -231,7 +231,7 @@ func (this *ShowwarHandler) handle(text []string) (result string, err error) {
 			} else {
 				battle := battles[num-1]
 				result = fmt.Sprintf("%d.%s ", num, battle.Scoutstate)
-				for _, caller := range acallers[num] {
+				for _, caller := range acallers[num+1] {
 					if time.Now().After(caller.Calledtime.Add(6 * time.Hour)) {
 						result = result + fmt.Sprintf("%s expried")
 					} else {
