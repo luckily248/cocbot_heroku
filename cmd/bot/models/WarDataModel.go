@@ -268,7 +268,7 @@ func UpdateBattleCountbyId(warid int, cout int) (err error) {
 	if err != nil {
 		return
 	}
-	stmt, err := wardata.DB.Prepare("delete from Battle where WarId=$1")
+	stmt, err = wardata.DB.Prepare("delete from Battle where WarId=$1")
 	if err != nil {
 		return
 	}
