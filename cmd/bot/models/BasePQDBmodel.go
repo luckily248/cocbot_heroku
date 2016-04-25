@@ -3,17 +3,15 @@ package models
 import (
 	"database/sql"
 
-	"os"
-
 	_ "github.com/lib/pq"
 )
 
-type BasePGDBmodel struct {
+type BasePQDBmodel struct {
 	DB *sql.DB
 }
 
-func (this *BasePGDBmodel) init() (err error) {
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+func (this *BasePQDBmodel) init() (err error) {
+	db, err := sql.Open("postgres", "user=postgres password=81099371 dbname=postgres sslmode=disable")
 	if err != nil {
 		return
 	}

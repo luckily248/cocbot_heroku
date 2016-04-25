@@ -15,55 +15,6 @@
 			"Rev": "77f6a70ae8925fc761f9d4b9b47f19a30a7946d4"
 		},
 		{
-			"ImportPath": "github.com/astaxie/beego",
-			"Comment": "v1.6.0-9-gfbb98fb",
-			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
-		},
-		{
-			"ImportPath": "github.com/astaxie/beego/config",
-			"Comment": "v1.6.0-9-gfbb98fb",
-			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
-		},
-		{
-			"ImportPath": "github.com/astaxie/beego/context",
-			"Comment": "v1.6.0-9-gfbb98fb",
-			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
-		},
-		{
-			"ImportPath": "github.com/astaxie/beego/grace",
-			"Comment": "v1.6.0-9-gfbb98fb",
-			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
-		},
-		{
-			"ImportPath": "github.com/astaxie/beego/logs",
-			"Comment": "v1.6.0-9-gfbb98fb",
-			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
-		},
-		{
-			"ImportPath": "github.com/astaxie/beego/session",
-			"Comment": "v1.6.0-9-gfbb98fb",
-			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
-		},
-		{
-			"ImportPath": "github.com/astaxie/beego/swagger",
-			"Comment": "v1.6.0-9-gfbb98fb",
-			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
-		},
-		{
-			"ImportPath": "github.com/astaxie/beego/toolbox",
-			"Comment": "v1.6.0-9-gfbb98fb",
-			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
-		},
-		{
-			"ImportPath": "github.com/astaxie/beego/utils",
-			"Comment": "v1.6.0-9-gfbb98fb",
-			"Rev": "fbb98fbe1fe5f6a4209772b44e2547714992340c"
-		},
-		{
-			"ImportPath": "github.com/beego/bee",
-			"Rev": "fa5d72e565384be86bee305956ea42bd6c58c31c"
-		},
-		{
 			"ImportPath": "github.com/go-sql-driver/mysql",
 			"Comment": "v1.2-136-g7a8740a",
 			"Rev": "7a8740a6bd8feb6af5786ab9a9f1513970019d8c"
@@ -260,26 +211,6 @@
 			"ImportPath": "gopkg.in/bluesuncorp/validator.v5",
 			"Comment": "v5.12",
 			"Rev": "d5acf1dac43705f8bfbb71d878e290e2bed3950b"
-		},
-		{
-			"ImportPath": "gopkg.in/mgo.v2",
-			"Comment": "r2016.02.04-1-gb6e2fa3",
-			"Rev": "b6e2fa371e64216a45e61072a96d4e3859f169da"
-		},
-		{
-			"ImportPath": "gopkg.in/mgo.v2/bson",
-			"Comment": "r2016.02.04-1-gb6e2fa3",
-			"Rev": "b6e2fa371e64216a45e61072a96d4e3859f169da"
-		},
-		{
-			"ImportPath": "gopkg.in/mgo.v2/internal/sasl",
-			"Comment": "r2016.02.04-1-gb6e2fa3",
-			"Rev": "b6e2fa371e64216a45e61072a96d4e3859f169da"
-		},
-		{
-			"ImportPath": "gopkg.in/mgo.v2/internal/scram",
-			"Comment": "r2016.02.04-1-gb6e2fa3",
-			"Rev": "b6e2fa371e64216a45e61072a96d4e3859f169da"
 		}
 	]
 }

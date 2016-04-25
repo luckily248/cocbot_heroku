@@ -8,11 +8,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
 func main() {
+
 	http.HandleFunc("/bot", WarDataController)
 	http.ListenAndServe(":8888", nil)
 }
