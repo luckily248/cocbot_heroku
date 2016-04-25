@@ -109,7 +109,7 @@ func (this *HelpHandler) handle(text []string) (result string, err error) {
 	for _, handler := range mainhandler.allcommands {
 		resultslice = append(resultslice, handler.getHelp())
 	}
-	result = strings.Join(resultslice, "\n")
+	result = strings.Join(resultslice, "\n\n")
 	return
 }
 func (this *HelpHandler) getCommands() []string {
@@ -236,7 +236,7 @@ func (this *ShowwarHandler) handle(text []string) (result string, err error) {
 						result = result + fmt.Sprintf("%s expried")
 					} else {
 						expried := caller.Calledtime.Add(6 * time.Hour).Sub(time.Now())
-						result = result + fmt.Sprintf("%s %sh%sm ", caller.Callername, expried.Hours(), expried.Minutes())
+						result = result + fmt.Sprintf("%s %dh%dm ", caller.Callername, expried.Hours(), expried.Minutes())
 					}
 				}
 			}
