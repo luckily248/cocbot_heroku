@@ -96,6 +96,9 @@ func AddWarData(teama string, teamb string, cout int) (id int, err error) {
 		if err != nil {
 			break
 		}
+		if i >= 10 {
+			time.Sleep(time.Second * 2)
+		}
 	}
 	return
 }

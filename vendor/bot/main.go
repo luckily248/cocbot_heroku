@@ -44,6 +44,10 @@ func WarDataController(w http.ResponseWriter, r *http.Request) {
 	if !strings.HasPrefix(rec.Text, "!") {
 		return
 	}
+	go handle(rec)
+	return
+}
+func handle(rec models.GMrecModel) {
 	reptext, err := handler.HandlecocText(rec)
 	fmt.Printf("reptextlen:%d\n", utf8.RuneCountInString(reptext))
 	rep := &models.GMrepModel{}
@@ -61,8 +65,7 @@ func WarDataController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println(string(buff))
-	go httpPost(buff)
-	return
+	httpPost(buff)
 }
 func httpPost(rep []byte) {
 	resp, err := http.Post("https://api.groupme.com/v3/bots/post",
