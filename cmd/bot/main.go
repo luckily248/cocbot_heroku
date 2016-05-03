@@ -51,7 +51,7 @@ func handle(rec models.GMrecModel) {
 	reptext, err := handler.HandlecocText(rec)
 	fmt.Printf("reptextlen:%d\n", utf8.RuneCountInString(reptext))
 	rep := &models.GMrepModel{}
-	rep.Init()
+	rep.InitbyGID(rec.Group_id)
 	if err != nil {
 		rep.SetText(err.Error())
 		fmt.Printf("err:%s\n", err.Error())
