@@ -200,7 +200,7 @@ func (this *ShowwarHandler) handle(text []string) (result string, err error) {
 		battlesresult := ""
 		for num, _ := range battles {
 			hightstar := -1
-			hightstars := "ZZZ"
+			hightstars := "\U0001F4A4\U0001F4A4\U0001F4A4"
 			lineresult := fmt.Sprintf("||%d.%s ", num+1, "")
 			for _, caller := range acallers[num+1] {
 				if caller.Starstate > -1 && caller.Starstate < 4 {
@@ -230,7 +230,7 @@ func (this *ShowwarHandler) handle(text []string) (result string, err error) {
 				err = errors.New(fmt.Sprintf("last one is %d\n", content.BattleLen))
 			} else {
 				hightstar := -1
-				hightstars := "ZZZ"
+				hightstars := "\U0001F4A4\U0001F4A4\U0001F4A4"
 				lineresult := fmt.Sprintf("||%d.%s ", num, "")
 				for _, caller := range acallers[num] {
 					if caller.Starstate > -1 && caller.Starstate < 4 {
@@ -683,7 +683,7 @@ func (this *OpenedwarHandler) handle(text []string) (result string, err error) {
 	battlesresult := ""
 	for num, battle := range battles {
 		hightstar := -1
-		hightstars := "ZZZ"
+		hightstars := "\U0001F4A4\U0001F4A4\U0001F4A4"
 		called := false
 		lineresult := fmt.Sprintf("||%d.%s ", num+1, battle.Scoutstate)
 		for _, caller := range acallers[num+1] {
