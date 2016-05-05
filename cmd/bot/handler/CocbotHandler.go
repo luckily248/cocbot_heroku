@@ -198,10 +198,10 @@ func (this *ShowwarHandler) handle(text []string) (result string, err error) {
 			content.BattleLen,
 			content.Begintime.Format("3:04PM MST 1/2/2006"))
 		battlesresult := ""
-		for num, battle := range battles {
+		for num, _ := range battles {
 			hightstar := -1
 			hightstars := "ZZZ"
-			lineresult := fmt.Sprintf("||%d.%s ", num+1, battle.Scoutstate)
+			lineresult := fmt.Sprintf("||%d.%s ", num+1, "")
 			for _, caller := range acallers[num+1] {
 				if caller.Starstate > -1 && caller.Starstate < 4 {
 					if caller.Starstate > hightstar {
@@ -210,10 +210,10 @@ func (this *ShowwarHandler) handle(text []string) (result string, err error) {
 					}
 					lineresult = lineresult + fmt.Sprintf("|%s %s", caller.Callername, caller.GetStarstate())
 				} else {
-					if time.Now().After(caller.Calledtime.Add(6 * time.Hour)) {
+					if time.Now().After(caller.Calledtime.Add(4 * time.Hour)) {
 						lineresult = lineresult + fmt.Sprintf("|%s expried", caller.Callername)
 					} else {
-						expried := caller.Calledtime.Add(6 * time.Hour).Sub(time.Now())
+						expried := caller.Calledtime.Add(4 * time.Hour).Sub(time.Now())
 						lineresult = lineresult + fmt.Sprintf("|%s %dh%dm ", caller.Callername, int(expried.Hours()), int(math.Mod(expried.Minutes(), 60)))
 					}
 				}
@@ -231,7 +231,7 @@ func (this *ShowwarHandler) handle(text []string) (result string, err error) {
 			} else {
 				hightstar := -1
 				hightstars := "ZZZ"
-				lineresult := fmt.Sprintf("||%d.%s ", num, battles[num-1].Scoutstate)
+				lineresult := fmt.Sprintf("||%d.%s ", num, "")
 				for _, caller := range acallers[num] {
 					if caller.Starstate > -1 && caller.Starstate < 4 {
 						if caller.Starstate > hightstar {
@@ -240,10 +240,10 @@ func (this *ShowwarHandler) handle(text []string) (result string, err error) {
 						}
 						lineresult = lineresult + fmt.Sprintf("|%s %s", caller.Callername, caller.GetStarstate())
 					} else {
-						if time.Now().After(caller.Calledtime.Add(6 * time.Hour)) {
+						if time.Now().After(caller.Calledtime.Add(4 * time.Hour)) {
 							lineresult = lineresult + fmt.Sprintf("|%s expried", caller.Callername)
 						} else {
-							expried := caller.Calledtime.Add(6 * time.Hour).Sub(time.Now())
+							expried := caller.Calledtime.Add(4 * time.Hour).Sub(time.Now())
 							lineresult = lineresult + fmt.Sprintf("|%s %dh%dm ", caller.Callername, int(expried.Hours()), int(math.Mod(expried.Minutes(), 60)))
 						}
 					}
@@ -353,12 +353,16 @@ func (this *CallHandler) handle(text []string) (result string, err error) {
 			newcallnum = num
 		}
 	}
+	calledtime := time.Now()
+	if calledtime.Before(content.Begintime) {
+		calledtime = content.Begintime
+	}
 
 	if newcallnum == -1 {
-		newcallp := &models.Caller{content.Id, num1, mainhandler.rec.Name, -1, time.Now()}
+		newcallp := &models.Caller{content.Id, num1, mainhandler.rec.Name, -1, calledtime}
 		err = models.AddCaller(newcallp)
 	} else {
-		acallers[num1][newcallnum].Calledtime = time.Now()
+		acallers[num1][newcallnum].Calledtime = calledtime
 		err = models.UpdateCaller(acallers[num1][newcallnum])
 	}
 
@@ -690,7 +694,7 @@ func (this *OpenedwarHandler) handle(text []string) (result string, err error) {
 				}
 				lineresult = lineresult + fmt.Sprintf("|%s %s", caller.Callername, caller.GetStarstate())
 			} else {
-				if time.Now().After(caller.Calledtime.Add(6 * time.Hour)) {
+				if time.Now().After(caller.Calledtime.Add(4 * time.Hour)) {
 					continue
 				} else {
 					called = true
