@@ -544,13 +544,16 @@ func (this *EditwarHandler) handle(text []string) (result string, err error) {
 		if strings.HasSuffix(text[2], "am") {
 			fmt.Printf("trim time:%s\n", strings.Trim(text[2], "am"))
 			h, err = strconv.Atoi(strings.Trim(text[2], "am"))
-			if err != nil || h < 0 {
+			if err != nil || h < 0 || h >= 1300 || (h >= 13 && h < 100) {
 				err = errors.New("wrong time format")
 			} else {
 				mi := 0
-				if h > 12 {
+				if h > 13 {
 					mi = int(math.Mod(float64(h), 100))
 					h = int(h / 100)
+				}
+				if h == 12 {
+					h = 0
 				}
 				y, m, d := now.Date()
 				if now.Hour()*60+now.Minute() > h*60+mi { //if befor now so will be tmw
@@ -576,13 +579,16 @@ func (this *EditwarHandler) handle(text []string) (result string, err error) {
 
 			h, err = strconv.Atoi(strings.Trim(text[2], "pm"))
 			fmt.Printf("trim time:%d\n", h)
-			if err != nil || h < 0 {
+			if err != nil || h < 0 || h >= 1300 || (h >= 13 && h < 100) {
 				err = errors.New("wrong time format")
 			} else {
 				mi := 0
-				if h > 12 {
+				if h > 13 {
 					mi = int(math.Mod(float64(h), 100))
 					h = int(h / 100)
+				}
+				if h == 12 {
+					h = 0
 				}
 				h = h + 12
 				y, m, d := now.Date()
