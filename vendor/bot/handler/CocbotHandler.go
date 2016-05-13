@@ -145,10 +145,11 @@ func (this *NewwarHandler) handle(text []string) (result string, err error) {
 		err = errors.New("server error")
 	} else {
 		content, err := models.GetWarData(id)
+		nylocation, _ := time.LoadLocation("America/New_York")
 		if err == nil {
 			fmt.Printf("now time:%v\n", time.Now())
 			fmt.Printf("default time:%v\n", content.Begintime)
-			result = fmt.Sprintf("War #%d Created \n %s VS %s \n %d vs %d \n War starts %s", content.Id, content.TeamA, content.TeamB, cout, cout, content.Begintime.Format("3:04PM MST 1/2/2006"))
+			result = fmt.Sprintf("War #%d Created \n %s VS %s \n %d vs %d \n War starts %s", content.Id, content.TeamA, content.TeamB, cout, cout, content.Begintime.In(nylocation).Format("3:04PM MST 1/2/2006"))
 		}
 	}
 
@@ -190,13 +191,14 @@ func (this *ShowwarHandler) handle(text []string) (result string, err error) {
 		return
 	}
 	if len(text) == 1 {
+		nylocation, _ := time.LoadLocation("America/New_York")
 		result = fmt.Sprintf("War #%d  \n %s VS %s \n %d vs %d \n War starts %s\n",
 			content.Id,
 			content.TeamA,
 			content.TeamB,
 			content.BattleLen,
 			content.BattleLen,
-			content.Begintime.Format("3:04PM MST 1/2/2006"))
+			content.Begintime.In(nylocation).Format("3:04PM MST 1/2/2006"))
 		battlesresult := ""
 		for num, _ := range battles {
 			hightstar := -1
@@ -532,7 +534,8 @@ func (this *EditwarHandler) handle(text []string) (result string, err error) {
 			} else if !content.IsEnable {
 				result = "no war being"
 			} else {
-				result = fmt.Sprintf("War #%d Edited \n %s VS %s \n %d vs %d \n War starts %s", content.Id, content.TeamA, content.TeamB, content.BattleLen, content.BattleLen, content.Begintime.Format("3:04PM MST 1/2/2006"))
+				nylocation, _ := time.LoadLocation("America/New_York")
+				result = fmt.Sprintf("War #%d Edited \n %s VS %s \n %d vs %d \n War starts %s", content.Id, content.TeamA, content.TeamB, content.BattleLen, content.BattleLen, content.Begintime.In(nylocation).Format("3:04PM MST 1/2/2006"))
 			}
 		}
 	} else if isTime {
@@ -564,7 +567,8 @@ func (this *EditwarHandler) handle(text []string) (result string, err error) {
 					} else if !content.IsEnable {
 						result = "no war being"
 					} else {
-						result = fmt.Sprintf("War #%d Edited \n %s VS %s \n %d vs %d \n War starts %s", content.Id, content.TeamA, content.TeamB, content.BattleLen, content.BattleLen, content.Begintime.Format("3:04PM MST 1/2/2006"))
+						nylocation, _ := time.LoadLocation("America/New_York")
+						result = fmt.Sprintf("War #%d Edited \n %s VS %s \n %d vs %d \n War starts %s", content.Id, content.TeamA, content.TeamB, content.BattleLen, content.BattleLen, content.Begintime.In(nylocation).Format("3:04PM MST 1/2/2006"))
 					}
 				}
 			}
@@ -597,7 +601,8 @@ func (this *EditwarHandler) handle(text []string) (result string, err error) {
 					} else if !content.IsEnable {
 						result = "no war being"
 					} else {
-						result = fmt.Sprintf("War #%d Edited \n %s VS %s \n %d vs %d \n War starts %s", content.Id, content.TeamA, content.TeamB, content.BattleLen, content.BattleLen, content.Begintime.Format("3:04PM MST 1/2/2006"))
+						nylocation, _ := time.LoadLocation("America/New_York")
+						result = fmt.Sprintf("War #%d Edited \n %s VS %s \n %d vs %d \n War starts %s", content.Id, content.TeamA, content.TeamB, content.BattleLen, content.BattleLen, content.Begintime.In(nylocation).Format("3:04PM MST 1/2/2006"))
 					}
 				}
 			}
@@ -672,13 +677,14 @@ func (this *OpenedwarHandler) handle(text []string) (result string, err error) {
 	if err != nil {
 		return
 	}
+	nylocation, _ := time.LoadLocation("America/New_York")
 	result = fmt.Sprintf("War #%d  \n %s VS %s \n %d vs %d \n War starts %s\n",
 		content.Id,
 		content.TeamA,
 		content.TeamB,
 		content.BattleLen,
 		content.BattleLen,
-		content.Begintime.Format("3:04PM MST 1/2/2006"))
+		content.Begintime.In(nylocation).Format("3:04PM MST 1/2/2006"))
 
 	battlesresult := ""
 	for num, battle := range battles {
