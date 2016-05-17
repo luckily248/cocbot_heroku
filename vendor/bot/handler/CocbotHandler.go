@@ -544,7 +544,7 @@ func (this *EditwarHandler) handle(text []string) (result string, err error) {
 		if strings.HasSuffix(text[2], "am") {
 			fmt.Printf("trim time:%s\n", strings.Trim(text[2], "am"))
 			h, err = strconv.Atoi(strings.Trim(text[2], "am"))
-			if err != nil || h < 0 || h >= 1300 || (h >= 13 && h < 100) {
+			if err != nil || h < 0 || h >= 1260 || (h >= 13 && h < 100) {
 				err = errors.New("wrong time format")
 			} else {
 				mi := 0
@@ -579,7 +579,7 @@ func (this *EditwarHandler) handle(text []string) (result string, err error) {
 
 			h, err = strconv.Atoi(strings.Trim(text[2], "pm"))
 			fmt.Printf("trim time:%d\n", h)
-			if err != nil || h < 0 || h >= 1300 || (h >= 13 && h < 100) {
+			if err != nil || h < 0 || h >= 1260 || (h >= 13 && h < 100) {
 				err = errors.New("wrong time format")
 			} else {
 				mi := 0
