@@ -1,6 +1,6 @@
 package main
 
-import "bot"
+import "github.com/luckily248/bot"
 
 func main() {
 	bot.Run()
