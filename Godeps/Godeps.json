@@ -1,0 +1,32 @@
+{
+	"ImportPath": "cocbot_heroku",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v62",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/lib/pq",
+			"Comment": "go1.0-cutoff-84-g3cd0097",
+			"Rev": "3cd0097429be7d611bb644ef85b42bfb102ceea4"
+		},
+		{
+			"ImportPath": "github.com/lib/pq/oid",
+			"Comment": "go1.0-cutoff-84-g3cd0097",
+			"Rev": "3cd0097429be7d611bb644ef85b42bfb102ceea4"
+		},
+		{
+			"ImportPath": "github.com/luckily248/bot",
+			"Rev": "3755fed79111b52ff99f53807c12c14fc1243257"
+		},
+		{
+			"ImportPath": "github.com/luckily248/bot/handler",
+			"Rev": "3755fed79111b52ff99f53807c12c14fc1243257"
+		},
+		{
+			"ImportPath": "github.com/luckily248/bot/models",
+			"Rev": "3755fed79111b52ff99f53807c12c14fc1243257"
+		}
+	]
+}
