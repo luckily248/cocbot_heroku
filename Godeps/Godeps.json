@@ -18,15 +18,15 @@
 		},
 		{
 			"ImportPath": "github.com/luckily248/bot",
-			"Rev": "0dab2716927054ce00a8e682b561d4b6c09887f7"
+			"Rev": "254a090f3145a4901e57bd2149e3a7f62870f615"
 		},
 		{
 			"ImportPath": "github.com/luckily248/bot/handler",
-			"Rev": "0dab2716927054ce00a8e682b561d4b6c09887f7"
+			"Rev": "254a090f3145a4901e57bd2149e3a7f62870f615"
 		},
 		{
 			"ImportPath": "github.com/luckily248/bot/models",
-			"Rev": "0dab2716927054ce00a8e682b561d4b6c09887f7"
+			"Rev": "254a090f3145a4901e57bd2149e3a7f62870f615"
 		}
 	]
 }
